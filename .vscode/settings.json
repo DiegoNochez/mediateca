@@ -1,3 +1,7 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+  "code-runner.ignoreSelection": true,
+  "code-runner.runInTerminal": true,
+  "code-runner.executorMapByFileExtension": {
+    ".java": "echo Use the 'Run Java' button from Java extensions (Code Runner disabled for .java)"
+  }
 }
