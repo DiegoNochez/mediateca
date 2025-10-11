@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.diego.mediateca.domain.CD;
 import com.diego.mediateca.domain.DVD;
@@ -195,6 +197,95 @@ public class MaterialDAO {
             int filasAfectadas = ps.executeUpdate();
             return filasAfectadas > 0;
         }
+    }
+
+    // ==================== LISTAR DISPONIBLES (unidades > 0) ====================
+
+    public List<Libro> listarLibrosDisponibles() throws SQLException {
+        List<Libro> lista = new ArrayList<>();
+        String sql = "SELECT * FROM libros WHERE unidades_disponibles > 0";
+        try (var c = dbConnection.getConnection();
+             var ps = c.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
+            while (rs.next()) {
+                var l = new Libro(
+                        rs.getString("id_interno"),
+                        rs.getString("titulo"),
+                        rs.getString("autor"),
+                        rs.getInt("numero_paginas"),
+                        rs.getString("editorial"),
+                        rs.getString("isbn"),
+                        rs.getInt("anio_publicacion"),
+                        rs.getInt("unidades_disponibles")
+                );
+                lista.add(l);
+            }
+        }
+        return lista;
+    }
+
+    public List<Revista> listarRevistasDisponibles() throws SQLException {
+        List<Revista> lista = new ArrayList<>();
+        String sql = "SELECT * FROM revistas WHERE unidades_disponibles > 0";
+        try (var c = dbConnection.getConnection();
+             var ps = c.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
+            while (rs.next()) {
+                var r = new Revista(
+                        rs.getString("id_interno"),
+                        rs.getString("titulo"),
+                        rs.getString("editorial"),
+                        rs.getString("periodicidad"),
+                        rs.getDate("fecha_publicacion").toLocalDate(),
+                        rs.getInt("unidades_disponibles")
+                );
+                lista.add(r);
+            }
+        }
+        return lista;
+    }
+
+    public List<DVD> listarDVDsDisponibles() throws SQLException {
+        List<DVD> lista = new ArrayList<>();
+        String sql = "SELECT * FROM dvds WHERE unidades_disponibles > 0";
+        try (var c = dbConnection.getConnection();
+             var ps = c.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
+            while (rs.next()) {
+                var d = new DVD(
+                        rs.getString("id_interno"),
+                        rs.getString("titulo"),
+                        rs.getInt("unidades_disponibles"),
+                        rs.getString("director"),
+                        rs.getString("duracion"),
+                        rs.getString("genero")
+                );
+                lista.add(d);
+            }
+        }
+        return lista;
+    }
+
+    public List<CD> listarCDsDisponibles() throws SQLException {
+        List<CD> lista = new ArrayList<>();
+        String sql = "SELECT * FROM cds WHERE unidades_disponibles > 0";
+        try (var c = dbConnection.getConnection();
+             var ps = c.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
+            while (rs.next()) {
+                var cd = new CD(
+                        rs.getString("id_interno"),
+                        rs.getString("titulo"),
+                        rs.getInt("unidades_disponibles"),
+                        rs.getString("artista"),
+                        rs.getString("genero"),
+                        rs.getString("duracion"),
+                        rs.getInt("numero_canciones")
+                );
+                lista.add(cd);
+            }
+        }
+        return lista;
     }
 
     // ==================== MÉTODOS DE BÚSQUEDA ====================
