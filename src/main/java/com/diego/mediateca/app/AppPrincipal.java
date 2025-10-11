@@ -1,87 +1,290 @@
 package com.diego.mediateca.app;
 
+import com.diego.mediateca.domain.*;
+import com.diego.mediateca.services.MaterialService;  // ✔
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDate;
+import java.util.Optional;
+import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 public class AppPrincipal extends JFrame {
+
+    private final JPanel content = new JPanel(new CardLayout()); 
+    private final MaterialService service = ServiceFactory.materialService(); 
 
     public AppPrincipal() {
         initComponents();
     }
 
+
     private void initComponents() {
-        // Configuración básica de la ventana
         setTitle("Mediateca - Principal");
-        setSize(900, 600);
+        setSize(980, 640);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-        // Layout principal
         setLayout(new BorderLayout());
 
-        // Panel central con CardLayout
-        JPanel content = new JPanel(new CardLayout());
+        // Vistas de "Listar disponibles" por tipo 
+        content.add(new ListaPanel("LIBRO"),   "LIBROS");
+        content.add(new ListaPanel("REVISTA"), "REVISTAS");
+        content.add(new ListaPanel("DVD"),     "DVDS");
+        content.add(new ListaPanel("CD"),      "CDS");
 
-        // Paneles de prueba (luego reemplazaremos por JTable reales)
-        JPanel panelLibros   = new JPanel(); panelLibros.add(new JLabel("📚 Libros disponibles"));
-        JPanel panelRevistas = new JPanel(); panelRevistas.add(new JLabel("📰 Revistas disponibles"));
-        JPanel panelDVDs     = new JPanel(); panelDVDs.add(new JLabel("🎬 DVDs disponibles"));
-        JPanel panelCDs      = new JPanel(); panelCDs.add(new JLabel("💿 CDs disponibles"));
-
-        // Registrar las "tarjetas" con nombres
-        content.add(panelLibros,   "LIBROS");
-        content.add(panelRevistas, "REVISTAS");
-        content.add(panelDVDs,     "DVDS");
-        content.add(panelCDs,      "CDS");
-
-        // Borde temporal solo para ver el área
-        content.setBorder(BorderFactory.createTitledBorder("Área de contenido"));
-
-        // Agregamos el panel al centro
         add(content, BorderLayout.CENTER);
 
-        // === PASO 3: menú de navegación ===
-        crearMenu(content);
+        // Menú de navegación requerido 
+        crearMenu();
+
+        // Mostrar por defecto LIBROS
+        showCard("LIBROS");
     }
 
-    // ----- Menú de navegación -----
-    private void crearMenu(JPanel content) {
-        JMenuBar menuBar = new JMenuBar();
+    // MENU 6 OPCIONES
+   private void crearMenu() {
+    JMenuBar mb = new JMenuBar();
 
-        // Menú Archivo
-        JMenu mArchivo = new JMenu("Archivo");
-        JMenuItem miSalir = new JMenuItem("Salir");
-        miSalir.addActionListener(e -> dispose());
-        mArchivo.add(miSalir);
+    // MENU Disponibles (ver las listas por tipo) 
+    JMenu mDisponibles = new JMenu("Disponibles");
+    JMenuItem itLibros   = new JMenuItem("Libros");
+    JMenuItem itRevistas = new JMenuItem("Revistas");
+    JMenuItem itDVDs     = new JMenuItem("DVDs");
+    JMenuItem itCDs      = new JMenuItem("CDs");
 
-        // Menú Materiales
-        JMenu mMateriales = new JMenu("Materiales");
-        JMenuItem miLibros   = new JMenuItem("Libros");
-        JMenuItem miRevistas = new JMenuItem("Revistas");
-        JMenuItem miDVDs     = new JMenuItem("DVDs");
-        JMenuItem miCDs      = new JMenuItem("CDs");
+    itLibros.addActionListener(e -> showCard("LIBROS"));
+    itRevistas.addActionListener(e -> showCard("REVISTAS"));
+    itDVDs.addActionListener(e -> showCard("DVDS"));
+    itCDs.addActionListener(e -> showCard("CDS"));
 
-        // Acciones: cambiar tarjeta del CardLayout
-        miLibros.addActionListener(e   -> mostrarVista(content, "LIBROS"));
-        miRevistas.addActionListener(e -> mostrarVista(content, "REVISTAS"));
-        miDVDs.addActionListener(e     -> mostrarVista(content, "DVDS"));
-        miCDs.addActionListener(e      -> mostrarVista(content, "CDS"));
+    mDisponibles.add(itLibros);
+    mDisponibles.add(itRevistas);
+    mDisponibles.add(itDVDs);
+    mDisponibles.add(itCDs);
 
-        mMateriales.add(miLibros);
-        mMateriales.add(miRevistas);
-        mMateriales.add(miDVDs);
-        mMateriales.add(miCDs);
+    // MENU OPERACIONES
+    JMenu mOps = new JMenu("Operaciones");
 
-        // Agregar menús a la barra y asignarla al frame
-        menuBar.add(mArchivo);
-        menuBar.add(mMateriales);
-        setJMenuBar(menuBar);
+    JMenuItem miAgregar   = new JMenuItem("Agregar material…");
+    JMenuItem miModificar = new JMenuItem("Modificar material…");
+    JMenuItem miBorrar    = new JMenuItem("Borrar material…");
+    JMenuItem miBuscar    = new JMenuItem("Buscar material…");
+    JMenuItem miSalir     = new JMenuItem("Salir");
+
+    miAgregar.addActionListener(e -> onAgregarMaterial());
+    miModificar.addActionListener(e -> onModificarMaterial());
+    miBorrar.addActionListener(e -> onBorrarMaterial());
+    miBuscar.addActionListener(e -> onBuscarMaterial());
+    miSalir.addActionListener(e -> dispose());
+
+    mOps.add(miAgregar);
+    mOps.add(miModificar);
+    mOps.add(miBorrar);
+    mOps.add(miBuscar);
+    mOps.addSeparator();
+    mOps.add(miSalir);
+
+    // Orden en la barra
+    mb.add(mDisponibles);
+    mb.add(mOps);
+
+    setJMenuBar(mb);
+}
+
+
+    // ACCIONES
+    private void onAgregarMaterial() {
+        String[] tipos = {"LIBRO", "REVISTA", "DVD", "CD"};
+        String tipo = (String) JOptionPane.showInputDialog(
+                this, "Tipo de material:", "Agregar",
+                JOptionPane.QUESTION_MESSAGE, null, tipos, tipos[0]);
+
+        if (tipo == null) return;
+
+        try {
+            switch (tipo) {
+                case "LIBRO"   -> agregarLibroDialog();
+                case "REVISTA" -> agregarRevistaDialog();
+                case "DVD"     -> agregarDVDDialog();
+                case "CD"      -> agregarCDDialog();
+            }
+            JOptionPane.showMessageDialog(this, "Material agregado con éxito.");
+            refrescarVistaActual();
+        } catch (Exception ex) {
+            showError("No se pudo agregar: " + ex.getMessage());
+        }
     }
 
-    // Cambia la vista activa en el panel central
-    private void mostrarVista(JPanel content, String nombre) {
-        CardLayout cl = (CardLayout) content.getLayout();
-        cl.show(content, nombre);
+    private void onModificarMaterial() {
+        String id = input("ID interno del material a modificar:");
+        if (id == null || id.isBlank()) return;
+
+        Optional<Material> op = service.buscarPorId(id);
+        if (op.isEmpty()) {
+            showWarn("No existe material con ID: " + id);
+            return;
+        }
+        Material m = op.get();
+
+        try {
+            if (m instanceof Libro) {
+                int u = inputInt("Unidades nuevas para LIBRO " + m.getIdInterno() + ":");
+                service.modificarUnidadesLibro(m.getIdInterno(), u);
+            } else if (m instanceof Revista) {
+                int u = inputInt("Unidades nuevas para REVISTA " + m.getIdInterno() + ":");
+                service.modificarUnidadesRevista(m.getIdInterno(), u);
+            } else if (m instanceof DVD) {
+                String director = input("Director:");
+                String dur = input("Duración (hh:mm):");
+                String genero = input("Género:");
+                int u = inputInt("Unidades disponibles:");
+                service.modificarDVD(m.getIdInterno(), director, dur, genero, u);
+            } else if (m instanceof CD) {
+                String artista = input("Artista:");
+                String genero = input("Género:");
+                String dur = input("Duración (hh:mm):");
+                int num = inputInt("Número de canciones:");
+                int u = inputInt("Unidades disponibles:");
+                service.modificarCD(m.getIdInterno(), artista, genero, dur, num, u);
+            }
+            JOptionPane.showMessageDialog(this, "Material modificado.");
+            refrescarVistaActual();
+        } catch (Exception ex) {
+            showError("No se pudo modificar: " + ex.getMessage());
+        }
+    }
+
+    private void onBorrarMaterial() {
+        String id = input("ID interno del material a borrar:");
+        if (id == null || id.isBlank()) return;
+
+        Optional<Material> op = service.buscarPorId(id);
+        if (op.isEmpty()) {
+            showWarn("No existe material con ID: " + id);
+            return;
+        }
+
+        int ok = JOptionPane.showConfirmDialog(this,
+                "¿Borrar definitivamente el material " + id + "?",
+                "Confirmar", JOptionPane.YES_NO_OPTION);
+        if (ok != JOptionPane.YES_OPTION) return;
+
+        try {
+            service.borrarMaterial(id);
+            JOptionPane.showMessageDialog(this, "Material borrado.");
+            refrescarVistaActual();
+        } catch (Exception ex) {
+            showError("No se pudo borrar: " + ex.getMessage());
+        }
+    }
+
+    private void onBuscarMaterial() {
+        String id = input("ID interno a buscar:");
+        if (id == null || id.isBlank()) return;
+
+        Optional<Material> op = service.buscarPorId(id);
+        if (op.isEmpty()) {
+            showWarn("No existe material con ID: " + id);
+            return;
+        }
+        Material m = op.get();
+        JOptionPane.showMessageDialog(this, detalleMaterial(m), "Resultado", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    //   Helpers UI 
+    private void showCard(String name) {
+        ((CardLayout) content.getLayout()).show(content, name);
+    }
+
+    private void refrescarVistaActual() {
+        // fuerza un "Listar" de la tarjeta visible (si el panel lo implementa)
+        Component visible = null;
+        for (Component comp : content.getComponents()) {
+            if (comp.isVisible()) { visible = comp; break; }
+        }
+        if (visible instanceof ListaPanel lp) {
+            lp.refrescar();
+        }
+    }
+
+    private static String input(String msg) {
+        return JOptionPane.showInputDialog(null, msg);
+    }
+
+    private static int inputInt(String msg) {
+        String s = JOptionPane.showInputDialog(null, msg);
+        if (s == null) throw new IllegalArgumentException("Acción cancelada");
+        return Integer.parseInt(s.trim());
+    }
+
+    private static void showWarn(String msg) { JOptionPane.showMessageDialog(null, msg, "Aviso", JOptionPane.WARNING_MESSAGE); }
+    private static void showError(String msg){ JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE); }
+
+    private static String detalleMaterial(Material m) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: ").append(m.getIdInterno()).append('\n')
+          .append("Título: ").append(m.getTitulo()).append('\n')
+          .append("Unidades: ").append(m.getUnidadesDisponibles()).append('\n');
+
+        if (m instanceof Libro l) {
+            sb.append("Autor: ").append(l.getAutor()).append('\n')
+              .append("Editorial: ").append(l.getEditorial()).append('\n')
+              .append("ISBN: ").append(l.getIsbn()).append('\n')
+              .append("Año: ").append(l.getAnioPublicacion());
+        } else if (m instanceof Revista r) {
+            sb.append("Editorial: ").append(r.getEditorial()).append('\n')
+              .append("Periodicidad: ").append(r.getPeriodicidad()).append('\n')
+              .append("Fecha publicación: ").append(r.getFechaPublicacion());
+        } else if (m instanceof DVD d) {
+            sb.append("Director: ").append(d.getDirector()).append('\n')
+              .append("Duración: ").append(d.getDuracion()).append('\n')
+              .append("Género: ").append(d.getGenero());
+        } else if (m instanceof CD c) {
+            sb.append("Artista: ").append(c.getArtista()).append('\n')
+              .append("Género: ").append(c.getGenero()).append('\n')
+              .append("Duración: ").append(c.getDuracion()).append('\n')
+              .append("# Canciones: ").append(c.getNumeroCanciones());
+        }
+        return sb.toString();
+    }
+
+    // Diálogos de alta 
+    private void agregarLibroDialog() {
+        String titulo = input("Título:");
+        String autor = input("Autor:");
+        int paginas = inputInt("Número de páginas:");
+        String editorial = input("Editorial:");
+        String isbn = input("ISBN:");
+        int anio = inputInt("Año de publicación:");
+        int unidades = inputInt("Unidades disponibles:");
+        service.agregarLibro(titulo, autor, paginas, editorial, isbn, anio, unidades);
+    }
+
+    private void agregarRevistaDialog() {
+        String titulo = input("Título:");
+        String editorial = input("Editorial:");
+        String periodicidad = input("Periodicidad (Mensual/Semanal/etc):");
+        String fecha = input("Fecha publicación (YYYY-MM-DD):");
+        int unidades = inputInt("Unidades disponibles:");
+        service.agregarRevista(titulo, editorial, periodicidad, LocalDate.parse(fecha), unidades);
+    }
+
+    private void agregarDVDDialog() {
+        String titulo = input("Título:");
+        String director = input("Director:");
+        String duracion = input("Duración (hh:mm):");
+        String genero = input("Género:");
+        int unidades = inputInt("Unidades disponibles:");
+        service.agregarDVD(titulo, director, duracion, genero, unidades);
+    }
+
+    private void agregarCDDialog() {
+        String titulo = input("Título:");
+        String artista = input("Artista:");
+        String genero = input("Género:");
+        String duracion = input("Duración (hh:mm):");
+        int num = inputInt("Número de canciones:");
+        int unidades = inputInt("Unidades disponibles:");
+        service.agregarCD(titulo, artista, genero, duracion, num, unidades);
     }
 
     public static void main(String[] args) {

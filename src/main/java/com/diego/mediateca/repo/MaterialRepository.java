@@ -11,30 +11,26 @@ import com.diego.mediateca.domain.Revista;
 import java.sql.SQLException;
 import java.util.*;
 
-/**
- * Repositorio híbrido:
- * - Si se construye con DAO, las lecturas de "disponibles" van a BD (JDBC).
- * - El resto (save/update/findAll/etc.) siguen usando el mapa en memoria (tu flujo actual).
- */
+
 public class MaterialRepository {
 
-    // --- En memoria (lo que ya tenías) ---
+   
     private final Map<String, Material> porId = new HashMap<>();
 
-    // --- JDBC (opcional) ---
-    private final MaterialDAO dao; // si es null, no hay BD
+   
+    private final MaterialDAO dao; 
 
-    /** Repositorio en memoria (sin BD) */
+   
     public MaterialRepository() {
         this.dao = null;
     }
 
-    /** Repositorio respaldado por JDBC */
+    
     public MaterialRepository(MaterialDAO dao) {
         this.dao = dao;
     }
 
-    // -------------------- CRUD en memoria (sin cambios) --------------------
+    // CRUD EN MEMORIA
 
     public boolean exists(String idInterno) {
         return porId.containsKey(idInterno);
@@ -69,17 +65,11 @@ public class MaterialRepository {
         porId.remove(idInterno);
     }
 
-    // -------------------- Lectura "disponibles por tipo" --------------------
-
-    /**
-     * Devuelve SOLO los materiales con unidades > 0 del tipo indicado.
-     * Si hay DAO, consulta BD; si no, filtra la colección en memoria.
-     * Tipos válidos: "LIBRO", "REVISTA", "DVD", "CD"
-     */
+   
     public List<Material> findDisponiblesPorTipo(String tipo) {
         String t = (tipo == null) ? "" : tipo.toUpperCase();
 
-        // 1) Conexión JDBC disponible → leer de BD
+       
         if (dao != null) {
             try {
                 List<Material> out = new ArrayList<>();
@@ -112,7 +102,7 @@ public class MaterialRepository {
             }
         }
 
-        // 2) Sin BD → filtrar lo que haya en memoria
+      
         List<Material> todos = findAll();
         List<Material> out = new ArrayList<>();
         for (Material m : todos) {
@@ -131,7 +121,7 @@ public class MaterialRepository {
                     if (m instanceof CD) out.add(m);
                     break;
                 default:
-                    // tipo desconocido -> vacío
+                   
             }
         }
         return out;
