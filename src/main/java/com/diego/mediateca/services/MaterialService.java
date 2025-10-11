@@ -1,4 +1,4 @@
-// src/main/java/com/diego/mediateca/services/MaterialService.java
+
 package com.diego.mediateca.services;
 
 import java.time.LocalDate;
@@ -51,8 +51,7 @@ public class MaterialService {
         return dvd;
     }
 
-    // ---------- Listar (Persona 4) ----------
-    /** Lista materiales DISPONIBLES (>0) por tipo: "LIBRO", "REVISTA", "DVD", "CD" */
+
     public List<Material> listarDisponiblesPorTipo(String tipo) {
         return repo.findDisponiblesPorTipo(tipo);
     }
@@ -85,7 +84,7 @@ public class MaterialService {
         repo.update(cd);
     }
 
-    /** Modifica un DVD */
+    
     public void modificarDVD(String idInterno, String director, String duracion,
                              String genero, int unidades) {
         Material material = repo.findById(idInterno)
