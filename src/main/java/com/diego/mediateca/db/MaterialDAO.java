@@ -14,9 +14,7 @@ import com.diego.mediateca.domain.Libro;
 import com.diego.mediateca.domain.Material;
 import com.diego.mediateca.domain.Revista;
 
-/**
- * Data Access Object para gestionar operaciones CRUD de materiales en BD
- */
+
 public class MaterialDAO {
     
     private final DatabaseConnection dbConnection;
@@ -25,12 +23,6 @@ public class MaterialDAO {
         this.dbConnection = DatabaseConnection.getInstance();
     }
 
-    // ==================== MÉTODOS DE MODIFICACIÓN (TU PARTE PRINCIPAL) ====================
-    
-    /**
-     * Modifica un libro en la base de datos
-     * Nota: Solo se pueden modificar unidades disponibles (campos son final)
-     */
     public boolean modificarLibro(String idInterno, int unidadesDisponibles) throws SQLException {
         String sql = "UPDATE libros SET unidades_disponibles = ? WHERE id_interno = ?";
         
@@ -43,10 +35,7 @@ public class MaterialDAO {
         }
     }
 
-    /**
-     * Modifica una revista en la base de datos
-     * Nota: Solo se pueden modificar unidades disponibles (campos son final)
-     */
+ 
     public boolean modificarRevista(String idInterno, int unidadesDisponibles) throws SQLException {
         String sql = "UPDATE revistas SET unidades_disponibles = ? WHERE id_interno = ?";
         
