@@ -10,7 +10,7 @@ public class AppPrincipal extends JFrame {
     }
 
     private void initComponents() {
-        // Configuración básica de la ventana
+       
         setTitle("Mediateca - Principal");
         setSize(900, 600);
         setLocationRelativeTo(null);
@@ -22,7 +22,7 @@ public class AppPrincipal extends JFrame {
         // Panel central con CardLayout
         JPanel content = new JPanel(new CardLayout());
 
-        // Paneles de prueba (luego reemplazaremos por JTable reales)
+        // Paneles de prueba 
         JPanel panelLibros   = new JPanel(); panelLibros.add(new JLabel("📚 Libros disponibles"));
         JPanel panelRevistas = new JPanel(); panelRevistas.add(new JLabel("📰 Revistas disponibles"));
         JPanel panelDVDs     = new JPanel(); panelDVDs.add(new JLabel("🎬 DVDs disponibles"));
@@ -40,7 +40,7 @@ public class AppPrincipal extends JFrame {
         // Agregamos el panel al centro
         add(content, BorderLayout.CENTER);
 
-        // === PASO 3: menú de navegación ===
+       
         crearMenu(content);
     }
 
