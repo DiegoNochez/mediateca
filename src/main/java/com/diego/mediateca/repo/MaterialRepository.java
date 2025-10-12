@@ -14,22 +14,23 @@ import java.util.*;
 
 public class MaterialRepository {
 
-  
+   
     private final Map<String, Material> porId = new HashMap<>();
 
+   
+    private final MaterialDAO dao; 
 
-    private final MaterialDAO dao; // si es null, no hay BD
-
-    
+   
     public MaterialRepository() {
         this.dao = null;
     }
 
-  
+    
     public MaterialRepository(MaterialDAO dao) {
         this.dao = dao;
     }
 
+    // CRUD EN MEMORIA
 
     public boolean exists(String idInterno) {
         return porId.containsKey(idInterno);
@@ -64,11 +65,11 @@ public class MaterialRepository {
         porId.remove(idInterno);
     }
 
-
+   
     public List<Material> findDisponiblesPorTipo(String tipo) {
         String t = (tipo == null) ? "" : tipo.toUpperCase();
 
-        // 1) Conexión JDBC disponible → leer de BD
+       
         if (dao != null) {
             try {
                 List<Material> out = new ArrayList<>();
@@ -101,7 +102,7 @@ public class MaterialRepository {
             }
         }
 
-
+      
         List<Material> todos = findAll();
         List<Material> out = new ArrayList<>();
         for (Material m : todos) {
