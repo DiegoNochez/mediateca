@@ -84,31 +84,13 @@ public class DatabaseConnection {
     }
 
     /**
-     * Crea las tablas iniciales si no existen
+     * NOTA: Las tablas ya no se crean aquí automáticamente
+     * Ahora se debe ejecutar el script SQL completo manualmente
      */
     private void crearTablasIniciales() {
-        try (Statement stmt = connection.createStatement()) {
-            
-            // Crear tabla de libros
-            stmt.execute(DatabaseConfig.CREATE_TABLE_LIBROS);
-            System.out.println("✓ Tabla 'libros' verificada/creada");
-            
-            // Crear tabla de revistas
-            stmt.execute(DatabaseConfig.CREATE_TABLE_REVISTAS);
-            System.out.println("✓ Tabla 'revistas' verificada/creada");
-            
-            // Crear tabla de CDs
-            stmt.execute(DatabaseConfig.CREATE_TABLE_CDS);
-            System.out.println("✓ Tabla 'cds' verificada/creada");
-            
-            // Crear tabla de DVDs
-            stmt.execute(DatabaseConfig.CREATE_TABLE_DVDS);
-            System.out.println("✓ Tabla 'dvds' verificada/creada");
-            
-        } catch (SQLException e) {
-            System.err.println("Error al crear tablas: " + e.getMessage());
-            throw new RuntimeException("Error al inicializar la base de datos", e);
-        }
+        System.out.println("⚠️  IMPORTANTE: Asegúrate de haber ejecutado el script SQL completo");
+        System.out.println("    El nuevo esquema usa herencia de tablas");
+        System.out.println("    Ejecuta: script_mediateca_herencia.sql");
     }
 
     /**

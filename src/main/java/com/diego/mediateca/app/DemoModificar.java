@@ -84,8 +84,7 @@ public class DemoModificar {
         var cdAntes = dao.buscarPorId("CDA00001");
         cdAntes.ifPresent(System.out::println);
         
-        dao.modificarCD("CDA00001", "The Beatles", "Rock Clásico", 
-                       "47:23", 17, 8);
+        dao.modificarCD("CDA00001", "The Beatles", "Rock Clásico", 17, 8);
         
         System.out.println("\nDespués de modificar:");
         var cdDespues = dao.buscarPorId("CDA00001");
@@ -98,8 +97,8 @@ public class DemoModificar {
         var dvdAntes = dao.buscarPorId("DVD00001");
         dvdAntes.ifPresent(System.out::println);
         
-        dao.modificarDVD("DVD00001", "Christopher Nolan", 
-                        "148:00", "Sci-Fi/Thriller", 10);
+        // Only update director and unidades (DAO supports id, director, unidades)
+        dao.modificarDVD("DVD00001", "Christopher Nolan", 10);
         
         System.out.println("\nDespués de modificar:");
         var dvdDespues = dao.buscarPorId("DVD00001");
